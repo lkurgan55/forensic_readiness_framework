@@ -1,0 +1,6 @@
+pandas
+fastapi
+uvicorn
+fastapi-utils
+configparser
+boto3
