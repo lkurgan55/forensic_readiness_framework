@@ -32,3 +32,20 @@ def read_json_file(file_path):
     except Exception as e:
         print(f"Сталася помилка під час читання JSON-файлу: {e}")
         return None
+
+def extract_keys(dictionary, keys):
+    """
+    Витягує значення зі словника за вказаними ключами.
+
+    :param dictionary: Словник, з якого потрібно витягти значення.
+    :param keys: Список ключів, які потрібно витягнути.
+    :return: Словник, що містить витягнуті значення за ключами.
+    """
+    extracted_dict = {}
+
+    for key in keys:
+        if key in dictionary:
+            extracted_dict[key] = dictionary[key]
+
+    return extracted_dict
+
