@@ -49,3 +49,17 @@ def extract_keys(dictionary, keys):
 
     return extracted_dict
 
+def save_dict_as_json(dictionary, file_path):
+    """
+    Зберігає словник у форматі JSON у вказаний файл.
+
+    :param dictionary: Словник, який потрібно зберегти.
+    :param file_path: Шлях до файлу для збереження JSON.
+    """
+    try:
+        with open(file_path, 'w') as json_file:
+            json.dump(dictionary, json_file, indent=4)
+        print(f"Словник успішно збережено як JSON у файлі: {file_path}")
+    except Exception as e:
+        print(f"Сталася помилка під час збереження JSON-файлу: {e}")
+
