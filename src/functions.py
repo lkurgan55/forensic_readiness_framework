@@ -63,3 +63,30 @@ def save_dict_as_json(dictionary, file_path):
     except Exception as e:
         print(f"Сталася помилка під час збереження JSON-файлу: {e}")
 
+def configure_cloudtrail(trail_name, bucket_name, include_global_events=True, **session):
+    # Ініціалізуємо клієнта boto3 для AWS CloudTrail
+    cloudtrail_client = boto3.client('cloudtrail', **session)
+
+    # Створюємо конфігурацію CloudTrail
+    cloudtrail_client.create_trail(
+        Name=trail_name,
+        S3BucketName=bucket_name,
+        IncludeGlobalServiceEvents=include_global_events
+    )
+
+    # Вмикаємо CloudTrail
+    cloudtrail_client.start_logging(Name=trail_name)
+
+def create_s3_bucket(bucket_name, **session):
+    # Ініціалізуємо клієнта boto3 для Amazon S3
+    s3_client = boto3.client('s3', **session)
+
+    # Перевіряємо, чи існує вже бакет з вказаною назвою
+    try:
+        s3_client.head_bucket(Bucket=bucket_name)
+        print(f"Бакет з назвою '{bucket_name}' вже існує.")
+    except:
+        # Якщо бакет не існує, створюємо його
+        s3_client.create_bucket(Bucket=bucket_name)
+        s3_client.put_bucket_policy(Bucket=bucket_name)
+        print(f"Бакет з назвою '{bucket_name}' був успішно створений.")
