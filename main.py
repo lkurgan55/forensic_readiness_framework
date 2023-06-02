@@ -14,6 +14,8 @@ from fastapi_utils.tasks import repeat_every
 
 from src.functions import create_s3_bucket
 from src.functions import configure_cloudtrail
+from src.functions import create_directory
+from src.functions import download_logs
 
 import configparser
 
@@ -43,7 +45,10 @@ def startup():
     app.aws_config = config['AWS']
     app.aws_cloudtrail = config['CLOUDTRAIL']
 
+    create_directory('aws_logs')
     create_s3_bucket(app.aws_cloudtrail['bucket_name'], **app.aws_config)
+    download_logs(app.aws_cloudtrail['bucket_name'], 'aws_logs',  '', **app.aws_config)
+    return
     configure_cloudtrail(
         app.aws_cloudtrail['trail_name'],
         app.aws_cloudtrail['bucket_name'],

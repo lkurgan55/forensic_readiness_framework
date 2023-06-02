@@ -1,6 +1,9 @@
 import boto3
 import json
 import pandas as pd
+import os
+import gzip
+import json
 
 def download_data_from_s3(bucket_name, object_key, destination_file_path):
     """
@@ -90,3 +93,42 @@ def create_s3_bucket(bucket_name, **session):
         s3_client.create_bucket(Bucket=bucket_name)
         s3_client.put_bucket_policy(Bucket=bucket_name)
         print(f"Бакет з назвою '{bucket_name}' був успішно створений.")
+
+def create_directory(directory_path):
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+        print(f"Папка '{directory_path}' була успішно створена.")
+    else:
+        print(f"Папка '{directory_path}' вже існує.")
+
+def download_logs(bucket_name: str, destination: str, date: str = '', region_name: str = '', **session):
+    s3_client = boto3.client('s3', **session)
+
+    date = '2023/05/27'
+    region_name = 'us-east-1'
+
+    check_string = f"{region_name}/{date}"
+    destination = f'{destination}/{date.replace("/","_")}' 
+
+    files = s3_client.list_objects(Bucket=bucket_name)['Contents']
+
+    files_to_download = [file['Key'] for file in files if check_string in file.get('Key', '')]
+    
+    create_directory(destination)
+    records = []
+    for file in files_to_download:
+        file_name = f"{destination}/{file.split('/')[-1]}"
+        s3_client.download_file(bucket_name, file, file_name) 
+
+        with gzip.open(file_name) as json_file:
+            data = json.load(json_file) 
+            records += data.get('Records', [])
+        
+        os.remove(file_name)
+    
+    with open(f'{destination}/logs.json', 'w') as json_file:
+        json.dump(records, json_file)
+
+def convert_logs(destination: str, date: str = ''):
+    destination = f'{destination}/{date.replace("/","_")}' 
+
