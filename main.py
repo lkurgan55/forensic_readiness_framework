@@ -4,10 +4,6 @@ import boto3
 from datetime import datetime
 
 
-from pydantic import BaseModel
-from pydantic.types import PositiveInt
-from fastapi.responses import RedirectResponse
-from fastapi import Depends, FastAPI, APIRouter, Request
 from time import time
 from datetime import datetime
 from fastapi_utils.tasks import repeat_every
@@ -22,18 +18,22 @@ import configparser
 tools_route = APIRouter()
 
 @tools_route.get("/analyze_log")
-def get_steam_2fa_code(log_path: str):
+def analyze_log(log_path: str):
     pass
 
 @tools_route.get("/generate_report")
-def get_steam_2fa_code(date: str):
+def generate_report(date: str):
+    pass
+
+@tools_route.post("/register_log")
+def register_log(log: str):
     pass
 
     
 app = FastAPI()
 app.include_router(tools_route, prefix="/tools", tags=['tools'])
 
-@app.get("/") # create auto-redirect to docs
+@app.get("/")
 def docs_page():
     return RedirectResponse("/docs")
 
@@ -56,8 +56,8 @@ def startup():
     )
 
 @app.on_event("startup")
-@repeat_every(seconds= 6 * 60 * 60) 
-def set_up():
+@repeat_every(seconds = app.aws_cloudtrail['period_get_logs']) 
+def checks_aws_logs():
     pass
 
 

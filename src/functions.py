@@ -22,12 +22,6 @@ def download_data_from_s3(bucket_name, object_key, destination_file_path):
         print(f"Сталася помилка під час завантаження файлу з S3: {e}")
 
 def read_json_file(file_path):
-    """
-    Зчитує JSON-файл за вказаним шляхом та повертає його в форматі словника.
-
-    :param file_path: Шлях до JSON-файлу.
-    :return: Словник, що містить дані з JSON-файлу.
-    """
     try:
         with open(file_path, 'r') as json_file:
             data = json.load(json_file)
@@ -37,13 +31,6 @@ def read_json_file(file_path):
         return None
 
 def extract_keys(dictionary, keys):
-    """
-    Витягує значення зі словника за вказаними ключами.
-
-    :param dictionary: Словник, з якого потрібно витягти значення.
-    :param keys: Список ключів, які потрібно витягнути.
-    :return: Словник, що містить витягнуті значення за ключами.
-    """
     extracted_dict = {}
 
     for key in keys:
@@ -53,45 +40,33 @@ def extract_keys(dictionary, keys):
     return extracted_dict
 
 def save_dict_as_json(dictionary, file_path):
-    """
-    Зберігає словник у форматі JSON у вказаний файл.
-
-    :param dictionary: Словник, який потрібно зберегти.
-    :param file_path: Шлях до файлу для збереження JSON.
-    """
     try:
         with open(file_path, 'w') as json_file:
             json.dump(dictionary, json_file, indent=4)
-        print(f"Словник успішно збережено як JSON у файлі: {file_path}")
+        print(f"Дані успішно збережено як JSON у файлі: {file_path}")
     except Exception as e:
-        print(f"Сталася помилка під час збереження JSON-файлу: {e}")
+        print(f"Сталася помилка під час збереження: {e}")
 
 def configure_cloudtrail(trail_name, bucket_name, include_global_events=True, **session):
     # Ініціалізуємо клієнта boto3 для AWS CloudTrail
     cloudtrail_client = boto3.client('cloudtrail', **session)
-
     # Створюємо конфігурацію CloudTrail
     cloudtrail_client.create_trail(
         Name=trail_name,
         S3BucketName=bucket_name,
         IncludeGlobalServiceEvents=include_global_events
     )
-
     # Вмикаємо CloudTrail
     cloudtrail_client.start_logging(Name=trail_name)
 
 def create_s3_bucket(bucket_name, **session):
     # Ініціалізуємо клієнта boto3 для Amazon S3
     s3_client = boto3.client('s3', **session)
-
-    # Перевіряємо, чи існує вже бакет з вказаною назвою
-    try:
+    try: # Перевіряємо, чи існує вже бакет з вказаною назвою
         s3_client.head_bucket(Bucket=bucket_name)
         print(f"Бакет з назвою '{bucket_name}' вже існує.")
-    except:
-        # Якщо бакет не існує, створюємо його
+    except: # Якщо бакет не існує, створюємо його
         s3_client.create_bucket(Bucket=bucket_name)
-        s3_client.put_bucket_policy(Bucket=bucket_name)
         print(f"Бакет з назвою '{bucket_name}' був успішно створений.")
 
 def create_directory(directory_path):
