@@ -47,8 +47,6 @@ def startup():
 
     create_directory('aws_logs')
     create_s3_bucket(app.aws_cloudtrail['bucket_name'], **app.aws_config)
-    download_logs(app.aws_cloudtrail['bucket_name'], 'aws_logs',  '', **app.aws_config)
-    return
     configure_cloudtrail(
         app.aws_cloudtrail['trail_name'],
         app.aws_cloudtrail['bucket_name'],
@@ -58,8 +56,16 @@ def startup():
 @app.on_event("startup")
 @repeat_every(seconds = app.aws_cloudtrail['period_get_logs']) 
 def checks_aws_logs():
-    pass
-
+    date = datetime.now().strftime('%Y/%d/%m')
+    print(f'Завантаження журналів логування за {date}')
+    
+    download_logs(
+        app.aws_cloudtrail['bucket_name'], 
+        'aws_logs',
+        date, 
+        app.aws_cloudtrail['region_name'],
+        **app.aws_config
+    )
 
 
 @app.on_event('shutdown')

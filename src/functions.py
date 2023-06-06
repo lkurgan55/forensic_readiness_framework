@@ -79,9 +79,6 @@ def create_directory(directory_path):
 def download_logs(bucket_name: str, destination: str, date: str = '', region_name: str = '', **session):
     s3_client = boto3.client('s3', **session)
 
-    date = '2023/05/27'
-    region_name = 'us-east-1'
-
     check_string = f"{region_name}/{date}"
     destination = f'{destination}/{date.replace("/","_")}' 
 
