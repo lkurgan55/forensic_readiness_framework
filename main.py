@@ -7,6 +7,9 @@ from datetime import datetime
 from time import time
 from datetime import datetime
 from fastapi_utils.tasks import repeat_every
+from fastapi import APIRouter
+from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from src.functions import create_s3_bucket
 from src.functions import configure_cloudtrail
@@ -47,25 +50,31 @@ def startup():
 
     create_directory('aws_logs')
     create_s3_bucket(app.aws_cloudtrail['bucket_name'], **app.aws_config)
-    configure_cloudtrail(
-        app.aws_cloudtrail['trail_name'],
-        app.aws_cloudtrail['bucket_name'],
-        **app.aws_config
-    )
+    # configure_cloudtrail(
+    #     app.aws_cloudtrail['trail_name'],
+    #     app.aws_cloudtrail['bucket_name'],
+    #     **app.aws_config
+    # )
+
+    print(app.aws_config['region_name'])
+
 
 @app.on_event("startup")
-@repeat_every(seconds = app.aws_cloudtrail['period_get_logs']) 
+@repeat_every(seconds = 86400) 
 def checks_aws_logs():
     date = datetime.now().strftime('%Y/%d/%m')
     print(f'Завантаження журналів логування за {date}')
-    
-    download_logs(
+
+    count = download_logs(
         app.aws_cloudtrail['bucket_name'], 
-        'aws_logs',
-        date, 
-        app.aws_cloudtrail['region_name'],
+        app.aws_cloudtrail['destination'],
+        date,
+        logs_region_name=app.aws_config['region_name'],
         **app.aws_config
     )
+    
+    print(f'Завантажено записів {count} за {date}')
+
 
 
 @app.on_event('shutdown')

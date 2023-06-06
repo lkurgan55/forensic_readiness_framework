@@ -5,21 +5,6 @@ import os
 import gzip
 import json
 
-def download_data_from_s3(bucket_name, object_key, destination_file_path):
-    """
-    Завантажує об'єкт з Amazon S3 у вказаний шлях файлу.
-    
-    :param bucket_name: Ім'я сховища (bucket) в Amazon S3.
-    :param object_key: Ключ об'єкта (файлу) в Amazon S3.
-    :param destination_file_path: Шлях до файлу, куди буде збережений завантажений об'єкт.
-    """
-    s3_client = boto3.client('s3')
-    
-    try:
-        s3_client.download_file(bucket_name, object_key, destination_file_path)
-        print(f"Файл успішно завантажено з S3. Шлях до файлу: {destination_file_path}")
-    except Exception as e:
-        print(f"Сталася помилка під час завантаження файлу з S3: {e}")
 
 def read_json_file(file_path):
     try:
@@ -76,16 +61,13 @@ def create_directory(directory_path):
     else:
         print(f"Папка '{directory_path}' вже існує.")
 
-def download_logs(bucket_name: str, destination: str, date: str = '', region_name: str = '', **session):
+def download_logs(bucket_name: str, destination: str, date: str = '', logs_region_name: str = '', **session):
     s3_client = boto3.client('s3', **session)
 
-    check_string = f"{region_name}/{date}"
+    check_string = f"{logs_region_name}/{date}"
     destination = f'{destination}/{date.replace("/","_")}' 
-
     files = s3_client.list_objects(Bucket=bucket_name)['Contents']
-
     files_to_download = [file['Key'] for file in files if check_string in file.get('Key', '')]
-    
     create_directory(destination)
     records = []
     for file in files_to_download:
@@ -100,6 +82,8 @@ def download_logs(bucket_name: str, destination: str, date: str = '', region_nam
     
     with open(f'{destination}/logs.json', 'w') as json_file:
         json.dump(records, json_file)
+    
+    return len(records)
 
 def convert_logs(destination: str, date: str = ''):
     destination = f'{destination}/{date.replace("/","_")}' 
