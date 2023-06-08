@@ -20,7 +20,7 @@ class LogModule:
         
         requests.post(url = self.log_route, params = {'log': json.dumps(log)})
 
-    async def follow(self, thefile: TextIOWrapper):
+    async def _follow(self, thefile: TextIOWrapper):
         thefile.seek(0,2) # перейти до кінця файлу
         while True:
             line = thefile.readline()
@@ -31,7 +31,7 @@ class LogModule:
 
     async def send_system_logs(self, file_to_read: str):
         with open(file_to_read, "r") as log_file:
-            follow_generator = self.follow(log_file)
+            follow_generator = self._follow(log_file)
             while True:
                 log = await anext(follow_generator)
                 log = {
