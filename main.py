@@ -15,6 +15,7 @@ from src.functions import create_s3_bucket
 from src.functions import configure_cloudtrail
 from src.functions import create_directory
 from src.functions import download_logs
+from src.functions import register_log
 
 import configparser
 
@@ -29,8 +30,8 @@ def generate_report(date: str):
     pass
 
 @tools_route.post("/register_log")
-def register_log(log: str):
-    pass
+def register_logs(log: str):
+    register_log(app.ec2_logs['destination'], json.loads(log))
 
     
 app = FastAPI()
@@ -47,6 +48,7 @@ def startup():
 
     app.aws_config = config['AWS']
     app.aws_cloudtrail = config['CLOUDTRAIL']
+    app.ec2_logs = config['EC2LOGS']
 
     create_directory('aws_logs')
     create_s3_bucket(app.aws_cloudtrail['bucket_name'], **app.aws_config)
@@ -65,15 +67,15 @@ def checks_aws_logs():
     date = datetime.now().strftime('%Y/%d/%m')
     print(f'Завантаження журналів логування за {date}')
 
-    count = download_logs(
-        app.aws_cloudtrail['bucket_name'], 
-        app.aws_cloudtrail['destination'],
-        date,
-        logs_region_name=app.aws_config['region_name'],
-        **app.aws_config
-    )
+    # count = download_logs(
+    #     app.aws_cloudtrail['bucket_name'], 
+    #     app.aws_cloudtrail['destination'],
+    #     date,
+    #     logs_region_name=app.aws_config['region_name'],
+    #     **app.aws_config
+    # )
     
-    print(f'Завантажено записів {count} за {date}')
+    # print(f'Завантажено записів {count} за {date}')
 
 
 

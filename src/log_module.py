@@ -1,5 +1,6 @@
 from datetime import datetime
 import requests
+import json
 
 class LogModule:
     def __init__(self, service_name: str, destination_ip: str, endpoint: str) -> None:

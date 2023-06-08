@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import gzip
 import json
+from datetime import datetime
 
 
 def read_json_file(file_path):
@@ -84,6 +85,23 @@ def download_logs(bucket_name: str, destination: str, date: str = '', logs_regio
         json.dump(records, json_file)
     
     return len(records)
+
+def register_log(destination: str, log: dict):
+    print(log)
+    service_name = log.get('service_name', '')
+    date = datetime.now().strftime('%Y_%d_%m')
+    destination = f'{destination}/{service_name}' if service_name \
+    else f'{destination}/no_named'
+    
+    create_directory(destination)
+    file_name = f'{destination}/{date}.json'
+    if os.path.exists(file_name):
+        with open(file_name, 'r') as file:
+            logs = json.load(file)
+    else: logs = []
+    logs.append(log)
+    with open(file_name, 'w') as file:
+        json.dump(logs, file)
 
 def convert_logs(destination: str, date: str = ''):
     destination = f'{destination}/{date.replace("/","_")}' 
