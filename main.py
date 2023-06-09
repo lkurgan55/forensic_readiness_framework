@@ -30,10 +30,10 @@ def analyze_log(log: str):
 @tools_route.get("/generate_report")
 def generate_report(date: str = '2023_05_27'):
     file_path = f'{app.aws_cloudtrail["destination"]}/{date}/logs.json'
-    report = analyze_logs(file_path, limit = 15)
+    report = analyze_logs(file_path, limit = 20)
 
     with open(f'{app.aws_cloudtrail["destination"]}/{date}/report.json', 'w') as file:
-        json.dump(report, file)
+        json.dump(report, file, indent=4)
 
     return report
 
