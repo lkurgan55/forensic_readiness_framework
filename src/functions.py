@@ -6,16 +6,6 @@ import gzip
 import json
 from datetime import datetime
 
-
-def read_json_file(file_path):
-    try:
-        with open(file_path, 'r') as json_file:
-            data = json.load(json_file)
-            return data
-    except Exception as e:
-        print(f"Сталася помилка під час читання JSON-файлу: {e}")
-        return None
-
 def extract_keys(dictionary, keys):
     extracted_dict = {}
 
@@ -103,6 +93,55 @@ def register_log(destination: str, log: dict):
     with open(file_name, 'w') as file:
         json.dump(logs, file)
 
-def convert_logs(destination: str, date: str = ''):
-    destination = f'{destination}/{date.replace("/","_")}' 
+def convert_logs(file_path: str):
+    with open(file_path, 'r') as log_file:
+        return json.load(log_file) 
 
+def analyze_log(log, **custom_params):
+    score = 0
+
+    user_identity_type = log.get('userIdentity', '').get('type', '')
+    if user_identity_type:
+        score += 10 if user_identity_type in ['Root'] + custom_params.get('user_identities', []) else 0
+
+    source_ip = log.get('sourceIPAddress', '')
+    if source_ip:
+        score += 2 if source_ip not in custom_params.get('trusted_ips', []) else 0
+
+    event_name = log.get('eventName', '')
+    if event_name:
+        score += 5 if any(
+            key_word in event_name 
+            for key_word in ['Create', 'Update', 'Delete', 'Change', 'Deactivate', 'Activate' 'Attach', 'Upload'] 
+            + custom_params.get('event_names', [])
+            ) else 0
+
+    event_type = log.get('eventType', '')
+    if event_type:
+        score += 5 if event_type in ['AwsConsoleSignIn', 'AwsConsoleAction'] \
+            + custom_params.get('user_identities', []) else 0
+
+    read_only = log.get('readOnly', True)
+    if not read_only:
+        score += 7
+
+    return score
+
+def analyze_logs(file_path: str, limit: int = 15, **custom_params):
+    logs = convert_logs(file_path)
+
+    report = {
+        'date_time': str(datetime.now()),
+        'count_of_logs': len(logs),
+        'count_of_dangerous': 0,
+        'list_of_dangerous': []
+    }
+
+    for log in logs:
+        score = analyze_log(log, **custom_params)
+
+        if score >= limit:
+            report['count_of_dangerous'] += 1
+            report['list_of_dangerous'].append(log)
+
+    return report

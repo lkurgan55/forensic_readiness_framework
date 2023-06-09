@@ -16,18 +16,26 @@ from src.functions import configure_cloudtrail
 from src.functions import create_directory
 from src.functions import download_logs
 from src.functions import register_log
+from src.functions import analyze_log
+from src.functions import analyze_logs
 
 import configparser
 
 tools_route = APIRouter()
 
 @tools_route.get("/analyze_log")
-def analyze_log(log_path: str):
-    pass
+def analyze_log(log: str):
+    return analyze_log(json.loads(log))
 
 @tools_route.get("/generate_report")
-def generate_report(date: str):
-    pass
+def generate_report(date: str = '2023_05_27'):
+    file_path = f'{app.aws_cloudtrail["destination"]}/{date}/logs.json'
+    report = analyze_logs(file_path, limit = 15)
+
+    with open(f'{app.aws_cloudtrail["destination"]}/{date}/report.json', 'w') as file:
+        json.dump(report, file)
+
+    return report
 
 @tools_route.post("/register_log")
 def register_logs(log: str):
