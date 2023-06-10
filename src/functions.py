@@ -1,27 +1,8 @@
-import boto3
-import json
-import pandas as pd
-import os
-import gzip
-import json
+import os, json , gzip
 from datetime import datetime
 
-def extract_keys(dictionary, keys):
-    extracted_dict = {}
+import boto3
 
-    for key in keys:
-        if key in dictionary:
-            extracted_dict[key] = dictionary[key]
-
-    return extracted_dict
-
-def save_dict_as_json(dictionary, file_path):
-    try:
-        with open(file_path, 'w') as json_file:
-            json.dump(dictionary, json_file, indent=4)
-        print(f"Дані успішно збережено як JSON у файлі: {file_path}")
-    except Exception as e:
-        print(f"Сталася помилка під час збереження: {e}")
 
 def configure_cloudtrail(trail_name, bucket_name, include_global_events=True, **session):
     # Ініціалізуємо клієнта boto3 для AWS CloudTrail
