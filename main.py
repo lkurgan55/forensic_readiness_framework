@@ -24,7 +24,7 @@ import configparser
 tools_route = APIRouter()
 
 @tools_route.get("/analyze_log")
-def analyze_log(log: str):
+def analyze_json_log(log: str):
     return analyze_log(json.loads(log))
 
 @tools_route.get("/generate_report")
@@ -84,6 +84,11 @@ def checks_aws_logs():
     # )
     
     # print(f'Завантажено записів {count} за {date}')
+
+    # report = analyze_logs(f'{app.aws_cloudtrail["destination"]}/{date}/logs.json', limit = 20)
+
+    # with open(f'{app.aws_cloudtrail["destination"]}/{date}/report.json', 'w') as file:
+    #     json.dump(report, file, indent=4)
 
 
 

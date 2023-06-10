@@ -1,0 +1,4 @@
+[
+    {"service_name": "test_service", "score": "15", "datetime": "2023-06-10 01:13:14.644643", 
+    "info": {"EventName": "LoginInSystem", "UserName": "test_user", "SourceIp": "192.168.0.105", "Success": false}}
+]
